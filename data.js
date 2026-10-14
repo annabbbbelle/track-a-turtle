@@ -1,11 +1,101 @@
 /* 
- * data.js - Simulated GPS Telemetry Data for Sea Turtles
+ * data.js - Simulated GPS Telemetry Data Generator
  * 
  * DEMONSTRATION DISCLAIMER:
  * This dataset contains simulated daily GPS telemetry coordinates generated for
- * educational and demonstration purposes for an AI class project ("Track the Turtle").
- * All positions are synthetic representations based on typical marine turtle movement patterns.
+ * educational purposes ("Track the Turtle").
  */
+
+function generateExplorerTrack() {
+  const pts = [];
+  let lat = 25.0;
+  let lon = -80.0;
+  const startDate = new Date('2026-01-01');
+
+  for (let i = 0; i < 150; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    pts.push({
+      date: d.toISOString().split('T')[0],
+      lat: Number(lat.toFixed(4)),
+      lon: Number(lon.toFixed(4))
+    });
+    lat += 0.115 + (Math.sin(i * 0.1) * 0.01);
+    lon += 0.320 + (Math.cos(i * 0.1) * 0.01);
+  }
+  return pts;
+}
+
+function generateHomebodyTrack() {
+  const pts = [];
+  const lat0 = 24.8000;
+  const lon0 = -80.5000;
+  let lat = lat0;
+  let lon = lon0;
+  const startDate = new Date('2026-01-01');
+
+  for (let i = 0; i < 150; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    pts.push({
+      date: d.toISOString().split('T')[0],
+      lat: Number(lat.toFixed(4)),
+      lon: Number(lon.toFixed(4))
+    });
+    const dLat = (Math.sin(i * 0.7) * 0.012) + (lat0 - lat) * 0.15;
+    const dLon = (Math.cos(i * 0.5) * 0.012) + (lon0 - lon) * 0.15;
+    lat += dLat;
+    lon += dLon;
+  }
+  return pts;
+}
+
+function generateWandererTrack() {
+  const pts = [];
+  let lat = 26.0;
+  let lon = -75.0;
+  let heading = 45;
+  const startDate = new Date('2026-01-01');
+
+  for (let i = 0; i < 150; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    pts.push({
+      date: d.toISOString().split('T')[0],
+      lat: Number(lat.toFixed(4)),
+      lon: Number(lon.toFixed(4))
+    });
+    const turn = (i % 2 === 0) ? 85 : -85;
+    heading = (heading + turn + (Math.sin(i) * 10)) % 360;
+    const rad = heading * (Math.PI / 180);
+    const stepSize = 0.18;
+    lat += stepSize * Math.cos(rad);
+    lon += stepSize * Math.sin(rad);
+  }
+  return pts;
+}
+
+function generateCommuterTrack() {
+  const pts = [];
+  let lat = 25.0;
+  let lon = -80.0;
+  const startDate = new Date('2026-01-01');
+  const angleRad = 20 * (Math.PI / 180);
+  const stepSize = 0.215;
+
+  for (let i = 0; i < 150; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    pts.push({
+      date: d.toISOString().split('T')[0],
+      lat: Number(lat.toFixed(4)),
+      lon: Number(lon.toFixed(4))
+    });
+    lat += stepSize * Math.cos(angleRad) + (Math.sin(i * 0.2) * 0.0005);
+    lon += stepSize * Math.sin(angleRad) + (Math.cos(i * 0.2) * 0.0005);
+  }
+  return pts;
+}
 
 const TURTLE_DATA = {
   explorer: {
@@ -37,113 +127,3 @@ const TURTLE_DATA = {
     track: generateCommuterTrack()
   }
 };
-
-// --- Helper Track Generators for 150 Daily GPS Fixes ---
-
-function generateExplorerTrack() {
-  // Trans-Atlantic route: Starts at FL (25.0, -80.0) -> moves NE far into North Atlantic
-  const pts = [];
-  let lat = 25.0;
-  let lon = -80.0;
-  let startDate = new Date('2026-01-01');
-
-  for (let i = 0; i < 150; i++) {
-    let currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
-    
-    pts.push({
-      date: currentDate.toISOString().split('T')[0],
-      lat: Number(lat.toFixed(4)),
-      lon: Number(lon.toFixed(4))
-    });
-
-    // Fast, long-distance North-East trajectory
-    lat += 0.115 + (Math.sin(i * 0.1) * 0.01);
-    lon += 0.320 + (Math.cos(i * 0.1) * 0.01);
-  }
-  return pts;
-}
-
-function generateHomebodyTrack() {
-  // Coastal localized range: Small fluctuations around biscayne reef area (24.8, -80.5)
-  const pts = [];
-  const lat0 = 24.8000;
-  const lon0 = -80.5000;
-  let lat = lat0;
-  let lon = lon0;
-  let startDate = new Date('2026-01-01');
-
-  for (let i = 0; i < 150; i++) {
-    let currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
-
-    pts.push({
-      date: currentDate.toISOString().split('T')[0],
-      lat: Number(lat.toFixed(4)),
-      lon: Number(lon.toFixed(4))
-    });
-
-    // Small random step with a strong restoring pull toward center home (lat0, lon0)
-    let dLat = (Math.sin(i * 0.7) * 0.012) + (lat0 - lat) * 0.15;
-    let dLon = (Math.cos(i * 0.5) * 0.012) + (lon0 - lon) * 0.15;
-    lat += dLat;
-    lon += dLon;
-  }
-  return pts;
-}
-
-function generateWandererTrack() {
-  // Zigzag route: Frequent sharp angle changes (70-110 deg) around Sargasso Sea
-  const pts = [];
-  let lat = 26.0;
-  let lon = -75.0;
-  let heading = 45; // Initial heading in degrees
-  let startDate = new Date('2026-01-01');
-
-  for (let i = 0; i < 150; i++) {
-    let currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
-
-    pts.push({
-      date: currentDate.toISOString().split('T')[0],
-      lat: Number(lat.toFixed(4)),
-      lon: Number(lon.toFixed(4))
-    });
-
-    // Sharp turn every step (alternating zigzags)
-    let turn = (i % 2 === 0) ? 85 : -85;
-    heading = (heading + turn + (Math.sin(i) * 10)) % 360;
-    
-    let rad = heading * (Math.PI / 180);
-    let stepSize = 0.18; // ~20 km/day
-    lat += stepSize * Math.cos(rad);
-    lon += stepSize * Math.sin(rad);
-  }
-  return pts;
-}
-
-function generateCommuterTrack() {
-  // Straight migration highway along coastal current: Extremely steady speed and direction
-  const pts = [];
-  let lat = 25.0;
-  let lon = -80.0;
-  let startDate = new Date('2026-01-01');
-  const angleRad = 20 * (Math.PI / 180); // 20 degrees East of North
-  const stepSize = 0.215; // ~23.8 km/day constant
-
-  for (let i = 0; i < 150; i++) {
-    let currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
-
-    pts.push({
-      date: currentDate.toISOString().split('T')[0],
-      lat: Number(lat.toFixed(4)),
-      lon: Number(lon.toFixed(4))
-    });
-
-    // Linear motion with tiny perturbation
-    lat += stepSize * Math.cos(angleRad) + (Math.sin(i * 0.2) * 0.0005);
-    lon += stepSize * Math.sin(angleRad) + (Math.cos(i * 0.2) * 0.0005);
-  }
-  return pts;
-}
