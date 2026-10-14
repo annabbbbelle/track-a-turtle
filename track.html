@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Track the Turtle | Live Telemetry Tracker</title>
+  <title>Track the Turtle | Live Telemetry & AI Prediction</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Leaflet CSS from CDN -->
+  <!-- Leaflet GIS CSS from CDN -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <!-- Load Dataset, Analysis Engine, Leaflet JS, Navigation & Tracker Scripts -->
+  <!-- Load Leaflet JS & TensorFlow.js CDN -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+
+  <!-- Load Local Data, Analytics Engine, Navigation & Tracker Scripts -->
   <script src="data.js"></script>
   <script src="analyze.js"></script>
   <script src="nav.js" defer></script>
   <script src="tracker.js" defer></script>
 
   <style>
-    /* Tracker Page Layout */
+    /* Tracker Dashboard Styling Extensions */
     .tracker-layout {
       display: grid;
       grid-template-columns: 1fr 360px;
@@ -35,19 +38,45 @@
 
     #map {
       width: 100%;
-      height: 480px;
+      height: 460px;
       border-radius: 8px;
       border: 1px solid var(--border-glow);
       background: var(--bg-deep);
     }
 
-    /* Playback Control Bar */
+    /* Map Route Legend */
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      margin-top: 0.8rem;
+      font-size: 0.82rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .legend-line {
+      width: 22px;
+      height: 4px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    /* Controls Bar */
     .controls-bar {
       background: var(--bg-deep);
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
       padding: 1rem 1.2rem;
-      margin-top: 1.2rem;
+      margin-top: 1rem;
     }
 
     .slider-row {
@@ -92,6 +121,74 @@
       font-weight: 700;
       color: var(--sea-green);
       margin-top: 0.2rem;
+    }
+
+    /* AI Prediction Section */
+    .ai-section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-top: 1.8rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .ai-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-deep);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      margin-top: 0.5rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-teal), var(--sea-green));
+      border-radius: 20px;
+      transition: width 0.1s linear;
+    }
+
+    .warning-box {
+      background: rgba(244, 162, 97, 0.12);
+      border: 1px solid var(--sand-accent);
+      color: var(--sand-accent);
+      padding: 0.9rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .winner-banner {
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .winner-ai {
+      background: rgba(0, 245, 212, 0.15);
+      border: 1px solid var(--sea-green);
+      color: var(--sea-green);
+    }
+
+    .winner-baseline {
+      background: rgba(244, 162, 97, 0.15);
+      border: 1px solid var(--sand-accent);
+      color: var(--sand-accent);
     }
 
     .stats-grid {
@@ -157,60 +254,141 @@
 
   <main>
     <div class="page-header">
-      <span class="badge">Live GIS Map Dashboard</span>
-      <h1 class="page-title">Interactive Telemetry Tracker</h1>
-      <p class="page-subtitle">Replay 150 days of daily GPS fixes, monitor speed variations, and inspect turtle behavioral analytics.</p>
+      <span class="badge">Live GIS Map & AI Forecasting</span>
+      <h1 class="page-title">Interactive Telemetry & AI Prediction</h1>
+      <p class="page-subtitle">Replay 150 days of turtle tracks or train an in-browser TensorFlow.js neural network to predict future movements!</p>
     </div>
 
-    <!-- Main Tracker Layout (Map Controls + Side Panel) -->
+    <!-- Main Tracker Layout -->
     <div class="tracker-layout">
 
-      <!-- Left Column: Turtle Selector & Map View -->
-      <div class="map-card">
-        
-        <!-- Turtle Selector Bar -->
-        <div class="tracker-controls" style="margin-bottom: 1rem;">
-          <div class="control-group" style="width: 100%;">
-            <label for="turtle-select" style="font-size: 0.95rem; font-weight: 600; color: var(--primary-cyan);">
-              Select Turtle:
-            </label>
-            <select id="turtle-select" class="select-input" style="flex: 1; font-weight: 600;">
-              <!-- Options populated by tracker.js -->
-            </select>
+      <!-- Left Column: Map + Playback Controls + AI Section -->
+      <div>
+        <div class="map-card">
+          
+          <!-- Turtle Selector Bar -->
+          <div class="tracker-controls" style="margin-bottom: 1rem;">
+            <div class="control-group" style="width: 100%;">
+              <label for="turtle-select" style="font-size: 0.95rem; font-weight: 600; color: var(--primary-cyan);">
+                Select Turtle:
+              </label>
+              <select id="turtle-select" class="select-input" style="flex: 1; font-weight: 600;">
+                <!-- Populated by tracker.js -->
+              </select>
+            </div>
           </div>
+
+          <!-- Leaflet Map Container -->
+          <div id="map"></div>
+
+          <!-- Map Route Legend -->
+          <div class="map-legend">
+            <div class="legend-item">
+              <span class="legend-line" style="background: #00f5d4;"></span>
+              <span>Traveled Path</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line" style="background: #f4a261;"></span>
+              <span>Actual (Next 10 Days)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line" style="background: #e0aaff; border-top: 2px dashed #e0aaff;"></span>
+              <span>AI Forecast (TF.js)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line" style="background: #ff6b6b; border-top: 2px dashed #ff6b6b;"></span>
+              <span>Baseline (Constant Velocity)</span>
+            </div>
+          </div>
+
+          <!-- Journey Replay Controls -->
+          <div class="controls-bar">
+            <div class="slider-row">
+              <button id="play-pause-btn" class="btn btn-primary" style="padding: 0.5rem 1.2rem; min-width: 120px; font-size: 0.9rem;">
+                ▶ Play Journey
+              </button>
+              <input type="range" id="day-slider" class="day-slider-input" min="0" max="149" value="0">
+            </div>
+
+            <!-- Live Telemetry Counters -->
+            <div class="live-stats-row">
+              <div class="live-stat-box">
+                <div class="live-stat-title">Date</div>
+                <div class="live-stat-val" id="live-stat-date">2026-01-01</div>
+              </div>
+              <div class="live-stat-box">
+                <div class="live-stat-title">Progress</div>
+                <div class="live-stat-val" id="live-stat-day">Day 1 / 150</div>
+              </div>
+              <div class="live-stat-box">
+                <div class="live-stat-title">Distance Traveled</div>
+                <div class="live-stat-val" id="live-stat-km">0.0 km</div>
+              </div>
+              <div class="live-stat-box">
+                <div class="live-stat-title">Today's Speed</div>
+                <div class="live-stat-val" id="live-stat-speed">0.0 km/day</div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Leaflet Map Container -->
-        <div id="map"></div>
-
-        <!-- Journey Replay Control Bar -->
-        <div class="controls-bar">
-          <div class="slider-row">
-            <button id="play-pause-btn" class="btn btn-primary" style="padding: 0.5rem 1.2rem; min-width: 120px; font-size: 0.9rem;">
-              ▶ Play Journey
+        <!-- TensorFlow.js AI Prediction Control Card -->
+        <div class="ai-section-card">
+          <div class="ai-header">
+            <div>
+              <h3 style="color: var(--primary-cyan); font-size: 1.3rem;">🤖 TensorFlow.js AI Movement Predictor</h3>
+              <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.2rem;">
+                Train a neural network using the last 5 days of movement vectors to forecast the next 10 days!
+              </p>
+            </div>
+            <button id="train-predict-btn" class="btn btn-primary" style="padding: 0.7rem 1.5rem;">
+              ⚡ Train & Predict
             </button>
-            <input type="range" id="day-slider" class="day-slider-input" min="0" max="149" value="0">
           </div>
 
-          <!-- Live Telemetry Stats Counters -->
-          <div class="live-stats-row">
-            <div class="live-stat-box">
-              <div class="live-stat-title">Date</div>
-              <div class="live-stat-val" id="live-stat-date">2026-01-01</div>
+          <div style="font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid var(--primary-teal); padding-left: 0.8rem;">
+            <strong>Requirements:</strong> Must have at least <strong>30 days</strong> of history (Day 30+) and at least <strong>10 days remaining</strong> on the slider.
+          </div>
+
+          <!-- Training Progress Bar Container -->
+          <div id="ai-progress-container" style="display: none; margin-top: 1.2rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+              <span id="ai-status-text" style="color: var(--sea-green); font-weight: 600;">Training Neural Network...</span>
             </div>
-            <div class="live-stat-box">
-              <div class="live-stat-title">Progress</div>
-              <div class="live-stat-val" id="live-stat-day">Day 1 / 150</div>
-            </div>
-            <div class="live-stat-box">
-              <div class="live-stat-title">Distance Traveled</div>
-              <div class="live-stat-val" id="live-stat-km">0.0 km</div>
-            </div>
-            <div class="live-stat-box">
-              <div class="live-stat-title">Today's Speed</div>
-              <div class="live-stat-val" id="live-stat-speed">0.0 km/day</div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="ai-progress-bar"></div>
             </div>
           </div>
+
+          <!-- Requirement Warning Alert Box -->
+          <div id="ai-warning-box" class="warning-box" style="display: none;"></div>
+
+          <!-- Evaluation Results Table Container -->
+          <div id="ai-results-container" style="display: none; margin-top: 1.5rem;">
+            <h4 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.8rem;">
+              📊 10-Day Prediction Performance Comparison
+            </h4>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>🤖 AI Model (TensorFlow.js)</th>
+                    <th>📏 Baseline (Constant Velocity)</th>
+                  </tr>
+                </thead>
+                <tbody id="ai-results-tbody">
+                  <!-- Injected dynamically by tracker.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Winner Banner -->
+            <div id="ai-winner-banner"></div>
+          </div>
+
         </div>
 
       </div>
