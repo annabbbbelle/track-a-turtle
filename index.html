@@ -6,11 +6,10 @@
   <title>Track the Turtle | Home</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Load Dataset and Analysis Engine -->
-  <script src="data.js"></script>
-  <script src="analyze.js"></script>
-  <!-- Load Responsive Dynamic Navigation -->
+  <!-- Deferred Script Loading -->
   <script src="nav.js" defer></script>
+  <script src="data.js" defer></script>
+  <script src="analyze.js" defer></script>
 
   <style>
     .stats-grid {
@@ -97,12 +96,12 @@
 </head>
 <body>
 
-  <!-- Navigation dynamically populated by nav.js -->
+  <!-- Navigation injected dynamically by nav.js -->
   <nav id="site-nav"></nav>
 
   <main>
 
-    <!-- Quiz Result Match Banner (Injected if localStorage exists) -->
+    <!-- Quiz Result Match Banner -->
     <div id="user-turtle-match-container"></div>
 
     <!-- Project Hero Section -->
@@ -174,7 +173,6 @@
     </p>
   </footer>
 
-  <!-- Script to handle localStorage match banner and render turtle cards -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       checkSavedQuizResult();
