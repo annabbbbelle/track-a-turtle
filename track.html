@@ -3,98 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Track the Turtle | Live Tracker</title>
+  <title>Track the Turtle | Live Telemetry Tracker</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Leaflet CSS from CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Load Dataset, Analysis Engine, Leaflet JS, Navigation & Tracker Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="data.js"></script>
+  <script src="analyze.js"></script>
   <script src="nav.js" defer></script>
+  <script src="tracker.js" defer></script>
+
+  <style>
+    /* Tracker Page Layout */
+    .tracker-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1.8rem;
+      align-items: start;
+    }
+
+    .map-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    #map {
+      width: 100%;
+      height: 480px;
+      border-radius: 8px;
+      border: 1px solid var(--border-glow);
+      background: var(--bg-deep);
+    }
+
+    /* Playback Control Bar */
+    .controls-bar {
+      background: var(--bg-deep);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-top: 1.2rem;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .day-slider-input {
+      flex: 1;
+      accent-color: var(--primary-cyan);
+      height: 6px;
+      cursor: pointer;
+    }
+
+    .live-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+
+    .live-stat-box {
+      background: rgba(255,255,255,0.03);
+      padding: 0.6rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .live-stat-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .live-stat-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--sea-green);
+      margin-top: 0.2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+      background: var(--bg-deep);
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      color: var(--sea-green);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .archetype-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .badge-explorer { background: rgba(0, 229, 255, 0.15); color: var(--primary-cyan); border: 1px solid rgba(0, 229, 255, 0.3); }
+    .badge-homebody { background: rgba(244, 162, 97, 0.15); color: var(--sand-accent); border: 1px solid rgba(244, 162, 97, 0.3); }
+    .badge-wanderer { background: rgba(255, 107, 107, 0.15); color: var(--coral-accent); border: 1px solid rgba(255, 107, 107, 0.3); }
+    .badge-commuter { background: rgba(0, 245, 212, 0.15); color: var(--sea-green); border: 1px solid rgba(0, 245, 212, 0.3); }
+
+    @media (max-width: 900px) {
+      .tracker-layout {
+        grid-template-columns: 1fr;
+      }
+      .live-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Navigation injected dynamically by nav.js -->
+  <!-- Navigation dynamically populated by nav.js -->
   <nav id="site-nav"></nav>
 
   <main>
     <div class="page-header">
-      <span class="badge">Live AI Predictions</span>
-      <h1 class="page-title">Sea Turtle Telemetry Dashboard</h1>
-      <p class="page-subtitle">Track active satellite positions and view machine-learning predicted migration vectors.</p>
+      <span class="badge">Live GIS Map Dashboard</span>
+      <h1 class="page-title">Interactive Telemetry Tracker</h1>
+      <p class="page-subtitle">Replay 150 days of daily GPS fixes, monitor speed variations, and inspect turtle behavioral analytics.</p>
     </div>
 
-    <!-- Controls Bar -->
-    <div class="tracker-controls">
-      <div class="control-group">
-        <label for="species-select" style="font-size: 0.9rem; color: var(--text-muted);">Species:</label>
-        <select id="species-select" class="select-input">
-          <option value="all">All Species</option>
-          <option value="loggerhead">Loggerhead</option>
-          <option value="leatherback">Leatherback</option>
-          <option value="green">Green Sea Turtle</option>
-        </select>
+    <!-- Main Tracker Layout (Map Controls + Side Panel) -->
+    <div class="tracker-layout">
+
+      <!-- Left Column: Turtle Selector & Map View -->
+      <div class="map-card">
+        
+        <!-- Turtle Selector Bar -->
+        <div class="tracker-controls" style="margin-bottom: 1rem;">
+          <div class="control-group" style="width: 100%;">
+            <label for="turtle-select" style="font-size: 0.95rem; font-weight: 600; color: var(--primary-cyan);">
+              Select Turtle:
+            </label>
+            <select id="turtle-select" class="select-input" style="flex: 1; font-weight: 600;">
+              <!-- Options populated by tracker.js -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div id="map"></div>
+
+        <!-- Journey Replay Control Bar -->
+        <div class="controls-bar">
+          <div class="slider-row">
+            <button id="play-pause-btn" class="btn btn-primary" style="padding: 0.5rem 1.2rem; min-width: 120px; font-size: 0.9rem;">
+              ▶ Play Journey
+            </button>
+            <input type="range" id="day-slider" class="day-slider-input" min="0" max="149" value="0">
+          </div>
+
+          <!-- Live Telemetry Stats Counters -->
+          <div class="live-stats-row">
+            <div class="live-stat-box">
+              <div class="live-stat-title">Date</div>
+              <div class="live-stat-val" id="live-stat-date">2026-01-01</div>
+            </div>
+            <div class="live-stat-box">
+              <div class="live-stat-title">Progress</div>
+              <div class="live-stat-val" id="live-stat-day">Day 1 / 150</div>
+            </div>
+            <div class="live-stat-box">
+              <div class="live-stat-title">Distance Traveled</div>
+              <div class="live-stat-val" id="live-stat-km">0.0 km</div>
+            </div>
+            <div class="live-stat-box">
+              <div class="live-stat-title">Today's Speed</div>
+              <div class="live-stat-val" id="live-stat-speed">0.0 km/day</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <div class="control-group">
-        <label style="font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">
-          <input type="checkbox" checked style="accent-color: var(--primary-cyan);"> Show AI Prediction Paths
-        </label>
+      <!-- Right Column: Turtle Analytics Side Panel -->
+      <div id="tracker-side-panel">
+        <!-- Rendered dynamically by tracker.js -->
       </div>
 
-      <div class="control-group">
-        <input type="text" class="text-input" placeholder="Search by Turtle Name or ID...">
-      </div>
-    </div>
-
-    <!-- Interactive Map Display Placeholder -->
-    <div class="map-placeholder">
-      <div class="map-grid-overlay"></div>
-      <div style="z-index: 1;">
-        <span style="font-size: 3rem;">🗺️</span>
-        <h3 style="color: var(--primary-cyan); margin-top: 0.5rem;">Interactive Map Visualization Container</h3>
-        <p style="color: var(--text-muted); max-width: 500px; font-size: 0.9rem; margin-top: 0.5rem;">
-          Map layer placeholder (ready for Leaflet.js or SVG trajectory overlay). Showing active waypoints and AI prediction lines.
-        </p>
-      </div>
-    </div>
-
-    <!-- Telemetry Roster Table Placeholder -->
-    <h3 style="margin-bottom: 1rem; color: var(--text-main);">Monitored Turtles</h3>
-    <div class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Species</th>
-            <th>Tag ID</th>
-            <th>Last Recorded Position</th>
-            <th>Speed</th>
-            <th>AI Prediction Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Barnacle Bill</strong></td>
-            <td>Loggerhead</td>
-            <td>#TURTLE-9042</td>
-            <td>24.85° N, 80.42° W</td>
-            <td>2.4 km/h</td>
-            <td><span style="color: var(--sea-green);">Active (94.2% Conf.)</span></td>
-          </tr>
-          <tr>
-            <td><strong>Shelly</strong></td>
-            <td>Leatherback</td>
-            <td>#TURTLE-8812</td>
-            <td>18.12° N, 65.30° W</td>
-            <td>3.8 km/h</td>
-            <td><span style="color: var(--sea-green);">Active (89.7% Conf.)</span></td>
-          </tr>
-          <tr>
-            <td><strong>Finley</strong></td>
-            <td>Green Turtle</td>
-            <td>#TURTLE-7601</td>
-            <td>28.32° N, 80.60° W</td>
-            <td>1.9 km/h</td>
-            <td><span style="color: var(--sand-accent);">Updating Model</span></td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </main>
 
