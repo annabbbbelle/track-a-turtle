@@ -14,12 +14,12 @@
   
   --text-main: #f0f8ff;
   --text-muted: #94a3b8;
-  --border-glow: rgba(0, 229, 255, 0.2);
+  --border-glow: rgba(0, 229, 255, 0.25);
   --border-subtle: rgba(255, 255, 255, 0.1);
   
   --nav-height: 70px;
   --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-  --transition: all 0.3s ease;
+  --transition: all 0.25s ease;
   --radius: 12px;
 }
 
@@ -30,6 +30,10 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-deep);
@@ -38,6 +42,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 a {
@@ -55,8 +60,9 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(6, 17, 30, 0.92);
+  background: rgba(6, 17, 30, 0.94);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-subtle);
   height: var(--nav-height);
 }
@@ -64,7 +70,7 @@ a:hover {
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1.25rem;
   height: 100%;
   display: flex;
   justify-content: space-between;
@@ -75,7 +81,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-main);
   letter-spacing: -0.01em;
@@ -92,7 +98,7 @@ a:hover {
 .nav-menu {
   display: flex;
   list-style: none;
-  gap: 1.5rem;
+  gap: 1.2rem;
   align-items: center;
 }
 
@@ -101,7 +107,7 @@ a:hover {
   font-weight: 500;
   padding: 0.5rem 0.9rem;
   border-radius: 8px;
-  position: relative;
+  transition: var(--transition);
 }
 
 .nav-link:hover {
@@ -116,7 +122,7 @@ a:hover {
   border: 1px solid var(--border-glow);
 }
 
-/* Mobile Hamburger Menu Toggle */
+/* Mobile Hamburger Toggle */
 .nav-toggle {
   display: none;
   background: transparent;
@@ -154,71 +160,68 @@ main {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  padding: 2rem 1.25rem;
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.2rem;
 }
 
 .page-title {
-  font-size: 2.3rem;
+  font-size: 2.2rem;
   color: var(--text-main);
   margin-bottom: 0.5rem;
+  line-height: 1.2;
 }
 
 .page-subtitle {
   color: var(--text-muted);
-  font-size: 1.1rem;
-  max-width: 650px;
+  font-size: 1.05rem;
+  max-width: 680px;
   margin: 0 auto;
 }
 
 .badge {
   display: inline-block;
-  padding: 0.3rem 0.8rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(0, 245, 212, 0.15);
+  background: rgba(0, 245, 212, 0.12);
   color: var(--sea-green);
   border: 1px solid rgba(0, 245, 212, 0.3);
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
-/* Cards & Grid Styling */
+/* Cards & Grid Layouts */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.8rem;
-  margin: 2rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
 }
 
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  padding: 1.8rem;
+  padding: 1.6rem;
   transition: var(--transition);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .card:hover {
   border-color: var(--border-glow);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   background: var(--bg-card);
-}
-
-.card-icon {
-  font-size: 2.2rem;
-  margin-bottom: 1rem;
 }
 
 .card-title {
   font-size: 1.3rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
   color: var(--primary-cyan);
 }
 
@@ -227,49 +230,55 @@ main {
   font-size: 0.95rem;
 }
 
-/* Hero Banner */
+/* Hero Section */
 .hero {
   background: linear-gradient(135deg, #0e2138 0%, #06111e 100%);
   border: 1px solid var(--border-glow);
   border-radius: var(--radius);
-  padding: 3.5rem 2rem;
+  padding: 3rem 1.5rem;
   text-align: center;
-  margin-bottom: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2.5rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 .hero-title {
-  font-size: 2.8rem;
+  font-size: 2.5rem;
   font-weight: 800;
   background: linear-gradient(90deg, var(--text-main), var(--primary-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 1rem;
+  line-height: 1.25;
 }
 
 .hero-description {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
-  max-width: 750px;
-  margin: 0 auto 2rem;
+  max-width: 720px;
+  margin: 0 auto 1.8rem;
 }
 
 /* Buttons */
 .btn-group {
   display: flex;
-  gap: 1rem;
+  gap: 0.9rem;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .btn {
-  display: inline-block;
-  padding: 0.8rem 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.6rem;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
   border: none;
   transition: var(--transition);
+  text-align: center;
 }
 
 .btn-primary {
@@ -280,7 +289,7 @@ main {
 .btn-primary:hover {
   background: var(--primary-cyan);
   color: #040e1a;
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
 }
 
 .btn-secondary {
@@ -292,139 +301,97 @@ main {
 .btn-secondary:hover {
   border-color: var(--primary-cyan);
   color: var(--primary-cyan);
+  background: rgba(0, 229, 255, 0.05);
 }
 
-/* Tracker Page Specific Placeholders */
+/* Controls & Form Elements */
 .tracker-controls {
-  background: var(--bg-surface);
-  padding: 1.2rem 1.5rem;
-  border-radius: var(--radius);
+  background: var(--bg-deep);
+  padding: 0.9rem 1.2rem;
+  border-radius: 8px;
   border: 1px solid var(--border-subtle);
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
 }
 
 .control-group {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
 }
 
 .select-input, .text-input {
-  background: var(--bg-deep);
+  background: var(--bg-surface);
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0.9rem;
   border-radius: 6px;
   font-size: 0.9rem;
   outline: none;
+  transition: var(--transition);
 }
 
 .select-input:focus, .text-input:focus {
   border-color: var(--primary-cyan);
 }
 
-.map-placeholder {
-  background: radial-gradient(circle at center, #0f2d4e 0%, #081728 100%);
-  border: 1px solid var(--border-glow);
-  border-radius: var(--radius);
-  height: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  text-align: center;
-  padding: 1.5rem;
-}
-
-.map-grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-}
-
-/* Table Styling */
+/* Tables */
 .table-container {
-  background: var(--bg-surface);
-  border-radius: var(--radius);
+  background: var(--bg-deep);
+  border-radius: 8px;
   border: 1px solid var(--border-subtle);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  font-size: 0.88rem;
+  min-width: 480px;
 }
 
 .data-table th, .data-table td {
-  padding: 1rem 1.2rem;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--border-subtle);
 }
 
 .data-table th {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   color: var(--primary-cyan);
   font-weight: 600;
-  font-size: 0.9rem;
   text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
 }
 
 .data-table tr:hover {
-  background: rgba(0, 229, 255, 0.04);
-}
-
-/* Quiz Placeholder Styling */
-.quiz-container {
-  max-width: 750px;
-  margin: 0 auto;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 2.5rem;
-}
-
-.quiz-option {
-  background: var(--bg-deep);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 1rem 1.2rem;
-  margin-bottom: 0.8rem;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.quiz-option:hover {
-  border-color: var(--primary-cyan);
-  background: var(--bg-card);
+  background: rgba(0, 229, 255, 0.03);
 }
 
 /* Footer */
 footer {
   background: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.25rem;
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   margin-top: auto;
 }
 
-/* Responsive Media Queries */
+footer a {
+  color: var(--primary-cyan);
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Styles for Mobile Phone Viewports */
 @media (max-width: 768px) {
   .nav-toggle {
     display: flex;
@@ -438,8 +405,8 @@ footer {
     background: var(--bg-surface);
     flex-direction: column;
     align-items: stretch;
-    padding: 1.5rem;
-    gap: 1rem;
+    padding: 1.2rem;
+    gap: 0.8rem;
     border-bottom: 1px solid var(--border-glow);
     transform: translateY(-150%);
     opacity: 0;
@@ -457,15 +424,44 @@ footer {
   .nav-link {
     display: block;
     text-align: center;
-    padding: 0.8rem;
+    padding: 0.75rem;
   }
 
   .hero-title {
-    font-size: 2rem;
+    font-size: 1.9rem;
   }
 
-  .tracker-controls {
+  .hero-description {
+    font-size: 0.98rem;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  main {
+    padding: 1.5rem 1rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .btn-group {
     flex-direction: column;
-    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .data-table th, .data-table td {
+    padding: 0.65rem 0.75rem;
   }
 }
