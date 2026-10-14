@@ -5,63 +5,205 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Track the Turtle | Personality Quiz</title>
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Load Dataset, Analysis Engine, Navigation & Quiz Logic -->
+  <script src="data.js"></script>
+  <script src="analyze.js"></script>
   <script src="nav.js" defer></script>
+  <script src="quiz.js" defer></script>
+
+  <style>
+    /* Styling enhancements for quiz UI */
+    .quiz-card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 2.2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .progress-container {
+      margin-bottom: 1.8rem;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-deep);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      margin-top: 0.5rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 12.5%;
+      background: linear-gradient(90deg, var(--primary-teal), var(--primary-cyan));
+      border-radius: 20px;
+      transition: width 0.4s ease;
+    }
+
+    .quiz-option {
+      background: var(--bg-deep);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      margin-bottom: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .quiz-option:hover {
+      border-color: var(--primary-cyan);
+      background: var(--bg-card);
+      transform: translateX(4px);
+    }
+
+    .quiz-option.selected {
+      border-color: var(--sea-green);
+      background: rgba(0, 245, 212, 0.1);
+    }
+
+    .option-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .option-text {
+      color: var(--text-main);
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .quiz-footer-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.8rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Result Card Styling */
+    .result-card {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .archetype-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .badge-explorer { background: rgba(0, 229, 255, 0.15); color: var(--primary-cyan); border: 1px solid rgba(0, 229, 255, 0.3); }
+    .badge-homebody { background: rgba(244, 162, 97, 0.15); color: var(--sand-accent); border: 1px solid rgba(244, 162, 97, 0.3); }
+    .badge-wanderer { background: rgba(255, 107, 107, 0.15); color: var(--coral-accent); border: 1px solid rgba(255, 107, 107, 0.3); }
+    .badge-commuter { background: rgba(0, 245, 212, 0.15); color: var(--sea-green); border: 1px solid rgba(0, 245, 212, 0.3); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      background: var(--bg-deep);
+      padding: 1.2rem;
+      border-radius: 10px;
+      margin: 1.2rem 0;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      color: var(--sea-green);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Navigation injected dynamically by nav.js -->
+  <!-- Navigation dynamically populated by nav.js -->
   <nav id="site-nav"></nav>
 
   <main>
     <div class="page-header">
-      <span class="badge">AI Matcher</span>
+      <span class="badge">AI Kinematic Matcher</span>
       <h1 class="page-title">Which Sea Turtle Are You?</h1>
-      <p class="page-subtitle">Answer a few questions about your lifestyle to let our similarity algorithm match you with an active tracked sea turtle!</p>
+      <p class="page-subtitle">Answer these 8 fun behavioral questions to match your travel habits with an active tracked sea turtle!</p>
     </div>
 
-    <div class="quiz-container">
-      <div style="margin-bottom: 1.5rem; text-align: center;">
-        <span style="color: var(--primary-cyan); font-weight: 600;">Question 1 of 3</span>
-        <h2 style="font-size: 1.4rem; margin-top: 0.5rem;">How do you prefer to spend your dream vacation?</h2>
-      </div>
-
-      <!-- Placeholder Question Options -->
-      <div class="quiz-option">
-        <span style="font-size: 1.2rem;">🌴</span>
-        <div>
-          <strong>Chilling on warm coastal beaches</strong>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Soaking up sunlight and enjoying calm shallow waters.</p>
+    <!-- Active Question Container -->
+    <div class="quiz-card" id="quiz-question-card">
+      <div class="progress-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span id="quiz-progress-text" style="color: var(--primary-cyan); font-weight: 600; font-size: 0.9rem;">
+            Question 1 of 8
+          </span>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Select one choice</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="quiz-progress-bar"></div>
         </div>
       </div>
 
-      <div class="quiz-option">
-        <span style="font-size: 1.2rem;">🌊</span>
-        <div>
-          <strong>Diving into deep, unexplored waters</strong>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Exploring deep ocean trenches and swimming long distances.</p>
-        </div>
+      <h2 id="quiz-question-text" style="font-size: 1.35rem; color: var(--text-main); margin-bottom: 1.5rem;">
+        Loading question...
+      </h2>
+
+      <!-- 4 Option Cards -->
+      <div id="quiz-options-container">
+        <!-- Injected dynamically by quiz.js -->
       </div>
 
-      <div class="quiz-option">
-        <span style="font-size: 1.2rem;">🪸</span>
-        <div>
-          <strong>Foraging through vibrant coral reefs</strong>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Staying close to shelter while searching for delicious snacks.</p>
-        </div>
-      </div>
-
-      <div style="text-align: center; margin-top: 2rem;">
-        <button class="btn btn-primary">Next Question &rarr;</button>
-      </div>
-
-      <!-- Result Preview Placeholder -->
-      <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px dashed var(--border-subtle); text-align: center;">
-        <h3 style="color: var(--sea-green); margin-bottom: 0.5rem;">AI Match Result Preview</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">
-          Your match vector will calculate similarity scores across <em>Loggerhead</em>, <em>Leatherback</em>, <em>Green Turtle</em>, and <em>Hawksbill</em> profiles!
-        </p>
+      <!-- Footer Navigation Buttons -->
+      <div class="quiz-footer-nav">
+        <button id="quiz-prev-btn" onclick="navigatePrevious()" class="btn btn-secondary" style="display: none; padding: 0.5rem 1.2rem;">
+          &larr; Back
+        </button>
+        <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: auto;">
+          Click an option to continue
+        </span>
       </div>
     </div>
+
+    <!-- Final Profile Result Container (Hidden until quiz completion) -->
+    <div id="quiz-results-card" style="display: none;">
+      <div id="quiz-result-container">
+        <!-- Rendered dynamically by quiz.js -->
+      </div>
+    </div>
+
   </main>
 
   <footer>
