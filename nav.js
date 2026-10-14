@@ -1,26 +1,22 @@
-/* nav.js - Shared Navigation Bar Generator for Track the Turtle */
+/* nav.js - Shared Navigation Bar Generator */
 
 function initNavigation() {
   const navElement = document.getElementById('site-nav');
   if (!navElement) return;
 
-  // Determine current page filename
   const path = window.location.pathname;
   let currentPage = path.substring(path.lastIndexOf('/') + 1);
 
-  // Default to index.html if on root or empty path
   if (!currentPage || currentPage === '' || currentPage === 'index') {
     currentPage = 'index.html';
   }
 
-  // Define navigation items
   const navItems = [
     { name: 'Home', href: 'index.html' },
     { name: 'Quiz', href: 'quiz.html' },
     { name: 'Tracker', href: 'tracker.html' }
   ];
 
-  // Construct Navigation HTML
   navElement.className = 'navbar';
   navElement.innerHTML = `
     <div class="nav-container">
@@ -50,7 +46,6 @@ function initNavigation() {
     </div>
   `;
 
-  // Hamburger Menu Interaction Logic
   const toggleBtn = document.getElementById('nav-toggle-btn');
   const navMenu = document.getElementById('nav-menu-list');
 
@@ -64,7 +59,6 @@ function initNavigation() {
 
     toggleBtn.addEventListener('click', toggleMenu);
 
-    // Close mobile menu when clicking outside
     document.addEventListener('click', (event) => {
       if (!navElement.contains(event.target) && navMenu.classList.contains('active')) {
         toggleBtn.classList.remove('active');
@@ -73,7 +67,6 @@ function initNavigation() {
       }
     });
 
-    // Close mobile menu when ESC key is pressed
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && navMenu.classList.contains('active')) {
         toggleBtn.classList.remove('active');
@@ -82,7 +75,6 @@ function initNavigation() {
       }
     });
 
-    // Close mobile menu when clicking any nav link
     const navLinks = navMenu.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
       link.addEventListener('click', () => {
@@ -94,7 +86,6 @@ function initNavigation() {
   }
 }
 
-// Run init function once the DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNavigation);
 } else {
