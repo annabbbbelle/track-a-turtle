@@ -5,66 +5,228 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Track the Turtle | Home</title>
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Load Dataset and Analysis Engine -->
+  <script src="data.js"></script>
+  <script src="analyze.js"></script>
+  <!-- Load Responsive Dynamic Navigation -->
   <script src="nav.js" defer></script>
+
+  <style>
+    /* Styling additions for turtle analytics grid cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+      background: var(--bg-deep);
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat-value {
+      color: var(--sea-green);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .archetype-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .badge-explorer { background: rgba(0, 229, 255, 0.15); color: var(--primary-cyan); border: 1px solid rgba(0, 229, 255, 0.3); }
+    .badge-homebody { background: rgba(244, 162, 97, 0.15); color: var(--sand-accent); border: 1px solid rgba(244, 162, 97, 0.3); }
+    .badge-wanderer { background: rgba(255, 107, 107, 0.15); color: var(--coral-accent); border: 1px solid rgba(255, 107, 107, 0.3); }
+    .badge-commuter { background: rgba(0, 245, 212, 0.15); color: var(--sea-green); border: 1px solid rgba(0, 245, 212, 0.3); }
+
+    .how-it-works-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .step-number {
+      background: var(--primary-teal);
+      color: #040e1a;
+      font-weight: 800;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Navigation injected dynamically by nav.js -->
+  <!-- Navigation dynamically populated by nav.js -->
   <nav id="site-nav"></nav>
 
   <main>
-    <!-- Hero Section -->
+    <!-- Project Hero Section -->
     <section class="hero">
-      <span class="badge">AI Class Final Project</span>
-      <h1 class="hero-title">Predicting Sea Turtle Migration Paths with Machine Learning</h1>
+      <span class="badge">AI & Kinematic Modeling Project</span>
+      <h1 class="hero-title">Track the Turtle 🐢</h1>
       <p class="hero-description">
-        Welcome to <strong>Track the Turtle</strong>! An interactive platform that combines satellite telemetry data with machine learning algorithms to map, predict, and protect endangered ocean navigators.
+        Analyzing simulated satellite telemetry data for 4 tagged sea turtles. Using geometric distance algorithms and statistical variance analysis, our system dynamically classifies sea turtle behavior into distinct behavioral personalities!
       </p>
       <div class="btn-group">
-        <a href="tracker.html" class="btn btn-primary">Launch Live Tracker 📍</a>
-        <a href="quiz.html" class="btn btn-secondary">Find Your Turtle Match 🧩</a>
+        <a href="#turtles-section" class="btn btn-primary">Meet The Turtles 👇</a>
+        <a href="#how-it-works" class="btn btn-secondary">How It Works ⚙️</a>
       </div>
     </section>
 
-    <!-- Key Features Overview -->
-    <section class="grid">
-      <div class="card">
-        <div class="card-icon">🛰️</div>
-        <h3 class="card-title">GPS Satellite Tracking</h3>
-        <p class="card-text">
-          Real-time oceanic telemetry monitoring coordinates, bathymetry depth, and ocean temperature for individual sea turtles.
-        </p>
+    <!-- How It Works Section -->
+    <section class="card" id="how-it-works" style="margin-bottom: 3rem;">
+      <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem; text-align: center;">How It Works: Telemetry & AI Classification Pipeline</h2>
+      
+      <div class="how-it-works-step">
+        <div class="step-number">1</div>
+        <div>
+          <h3 style="color: var(--text-main); font-size: 1.1rem;">GPS Telemetry Ingestion</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Each turtle records daily GPS fixes (<code style="color: var(--sea-green);">{date, lat, lon}</code>) spanning 150 consecutive days across ocean basins.
+          </p>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="card-icon">🤖</div>
-        <h3 class="card-title">AI Trajectory Prediction</h3>
-        <p class="card-text">
-          Using recurrent neural networks (RNN/LSTM) trained on ocean currents and seasonal temperature shifts to forecast route direction.
-        </p>
+      <div class="how-it-works-step">
+        <div class="step-number">2</div>
+        <div>
+          <h3 style="color: var(--text-main); font-size: 1.1rem;">Spherical Kinematic Metrics Calculation</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Our JavaScript engine (<code style="color: var(--sea-green);">analyze.js</code>) applies the <strong>Haversine Formula</strong> to compute real great-circle distance between coordinates, compass course bearings, daily cruising speed, speed variance/consistency, and average turning angles.
+          </p>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="card-icon">🐢</div>
-        <h3 class="card-title">Personality Matcher</h3>
-        <p class="card-text">
-          Take our interactive personality quiz to see which species and tagged sea turtle shares your behavioral characteristics!
-        </p>
+      <div class="how-it-works-step">
+        <div class="step-number">3</div>
+        <div>
+          <h3 style="color: var(--text-main); font-size: 1.1rem;">Rule-Based Dynamic AI Personality Classification</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Instead of hard-coding character traits, our classifier evaluates key decision-tree thresholds (displacement ratio, speed consistency percentage, and turning angle variance) to assign each turtle its archetype in real-time!
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- Project Mission Section -->
-    <section class="card" style="margin-top: 2rem;">
-      <h2 style="color: var(--primary-cyan); margin-bottom: 1rem;">About the Project</h2>
-      <p style="color: var(--text-muted); line-height: 1.8;">
-        Sea turtles migrate thousands of miles across open ocean every year. By applying predictive AI modeling to historical movement patterns and satellite oceanographic variables, this project aims to forecast sea turtle movement. This helps marine researchers anticipate potential interactions with commercial fisheries and changing climate corridors.
-      </p>
+    <!-- Dynamic Turtle Analytics Cards Grid -->
+    <section id="turtles-section">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-size: 2rem; color: var(--text-main);">Monitored Turtle Profiles</h2>
+        <p style="color: var(--text-muted);">Real-time statistics and calculated behavioral personalities derived directly from GPS telemetry.</p>
+      </div>
+
+      <div class="grid" id="turtle-cards-grid">
+        <!-- JS will dynamically render 4 turtle cards here -->
+      </div>
     </section>
+
   </main>
 
   <footer>
     <p>&copy; 2026 Track the Turtle • Built with plain HTML/CSS/JS for GitHub Pages</p>
   </footer>
+
+  <!-- Script to run analysis and dynamically build turtle cards -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridContainer = document.getElementById('turtle-cards-grid');
+      if (!gridContainer || typeof TURTLE_DATA === 'undefined') return;
+
+      gridContainer.innerHTML = ''; // Clear container
+
+      // Iterate through all 4 turtles in dataset
+      Object.keys(TURTLE_DATA).forEach(turtleKey => {
+        const turtle = TURTLE_DATA[turtleKey];
+        
+        // 1. Run statistical trajectory analysis
+        const stats = analyzeTurtleTrack(turtle.track);
+        
+        // 2. Derive dynamic personality classification from calculated stats
+        const personality = classifyPersonality(stats);
+
+        // 3. Construct Turtle Card HTML
+        const cardHtml = `
+          <div class="card" style="display: flex; flex-direction: column; justify: space-between;">
+            <div>
+              <div class="archetype-badge ${personality.colorClass}">
+                <span>${personality.icon}</span>
+                <span>${personality.archetype}</span>
+              </div>
+              
+              <h3 class="card-title" style="font-size: 1.5rem; margin-bottom: 0.2rem;">${turtle.name}</h3>
+              <p style="color: var(--sea-green); font-size: 0.85rem; font-style: italic; margin-bottom: 0.8rem;">
+                ${turtle.species}
+              </p>
+              
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                ${turtle.description}
+              </p>
+
+              <!-- Calculated Statistics Grid -->
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Total Distance</span>
+                  <span class="stat-value">${stats.totalDistanceKm.toLocaleString()} km</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Max Displacement</span>
+                  <span class="stat-value">${stats.maxDistanceFromStartKm.toLocaleString()} km</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Avg Daily Speed</span>
+                  <span class="stat-value">${stats.avgDailySpeedKmDay} km/day</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Speed Consistency</span>
+                  <span class="stat-value">${stats.speedConsistencyPct}%</span>
+                </div>
+                <div class="stat-item" style="grid-column: span 2;">
+                  <span class="stat-label">Avg Turning Angle</span>
+                  <span class="stat-value">${stats.avgTurningAngleDeg}° / step</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <a href="tracker.html?turtle=${turtle.id}" class="btn btn-primary" style="width: 100%; text-align: center; display: block;">
+                View Live Track 📍
+              </a>
+            </div>
+          </div>
+        `;
+
+        gridContainer.insertAdjacentHTML('beforeend', cardHtml);
+      });
+    });
+  </script>
 
 </body>
 </html>
