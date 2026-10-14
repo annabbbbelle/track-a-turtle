@@ -20,7 +20,6 @@
   <script src="tracker.js" defer></script>
 
   <style>
-    /* Tracker Dashboard Styling Extensions */
     .tracker-layout {
       display: grid;
       grid-template-columns: 1fr 360px;
@@ -44,7 +43,6 @@
       background: var(--bg-deep);
     }
 
-    /* Map Route Legend */
     .map-legend {
       display: flex;
       flex-wrap: wrap;
@@ -70,7 +68,6 @@
       display: inline-block;
     }
 
-    /* Controls Bar */
     .controls-bar {
       background: var(--bg-deep);
       border: 1px solid var(--border-subtle);
@@ -123,7 +120,6 @@
       margin-top: 0.2rem;
     }
 
-    /* AI Prediction Section */
     .ai-section-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
@@ -210,7 +206,7 @@
 
     .stat-label {
       color: var(--text-muted);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
     }
 
@@ -366,44 +362,4 @@
 
           <!-- Evaluation Results Table Container -->
           <div id="ai-results-container" style="display: none; margin-top: 1.5rem;">
-            <h4 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.8rem;">
-              📊 10-Day Prediction Performance Comparison
-            </h4>
-
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Metric</th>
-                    <th>🤖 AI Model (TensorFlow.js)</th>
-                    <th>📏 Baseline (Constant Velocity)</th>
-                  </tr>
-                </thead>
-                <tbody id="ai-results-tbody">
-                  <!-- Injected dynamically by tracker.js -->
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Winner Banner -->
-            <div id="ai-winner-banner"></div>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- Right Column: Turtle Analytics Side Panel -->
-      <div id="tracker-side-panel">
-        <!-- Rendered dynamically by tracker.js -->
-      </div>
-
-    </div>
-  </main>
-
-  <footer>
-    <p>&copy; 2026 Track the Turtle • Built with plain HTML/CSS/JS for GitHub Pages</p>
-  </footer>
-
-</body>
-</html>
+            <h4 style="color: var(--text-
