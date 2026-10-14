@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track the Turtle | Live Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="nav.js" defer></script>
+</head>
+<body>
+
+  <!-- Navigation injected dynamically by nav.js -->
+  <nav id="site-nav"></nav>
+
+  <main>
+    <div class="page-header">
+      <span class="badge">Live AI Predictions</span>
+      <h1 class="page-title">Sea Turtle Telemetry Dashboard</h1>
+      <p class="page-subtitle">Track active satellite positions and view machine-learning predicted migration vectors.</p>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="tracker-controls">
+      <div class="control-group">
+        <label for="species-select" style="font-size: 0.9rem; color: var(--text-muted);">Species:</label>
+        <select id="species-select" class="select-input">
+          <option value="all">All Species</option>
+          <option value="loggerhead">Loggerhead</option>
+          <option value="leatherback">Leatherback</option>
+          <option value="green">Green Sea Turtle</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label style="font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">
+          <input type="checkbox" checked style="accent-color: var(--primary-cyan);"> Show AI Prediction Paths
+        </label>
+      </div>
+
+      <div class="control-group">
+        <input type="text" class="text-input" placeholder="Search by Turtle Name or ID...">
+      </div>
+    </div>
+
+    <!-- Interactive Map Display Placeholder -->
+    <div class="map-placeholder">
+      <div class="map-grid-overlay"></div>
+      <div style="z-index: 1;">
+        <span style="font-size: 3rem;">🗺️</span>
+        <h3 style="color: var(--primary-cyan); margin-top: 0.5rem;">Interactive Map Visualization Container</h3>
+        <p style="color: var(--text-muted); max-width: 500px; font-size: 0.9rem; margin-top: 0.5rem;">
+          Map layer placeholder (ready for Leaflet.js or SVG trajectory overlay). Showing active waypoints and AI prediction lines.
+        </p>
+      </div>
+    </div>
+
+    <!-- Telemetry Roster Table Placeholder -->
+    <h3 style="margin-bottom: 1rem; color: var(--text-main);">Monitored Turtles</h3>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Species</th>
+            <th>Tag ID</th>
+            <th>Last Recorded Position</th>
+            <th>Speed</th>
+            <th>AI Prediction Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Barnacle Bill</strong></td>
+            <td>Loggerhead</td>
+            <td>#TURTLE-9042</td>
+            <td>24.85° N, 80.42° W</td>
+            <td>2.4 km/h</td>
+            <td><span style="color: var(--sea-green);">Active (94.2% Conf.)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Shelly</strong></td>
+            <td>Leatherback</td>
+            <td>#TURTLE-8812</td>
+            <td>18.12° N, 65.30° W</td>
+            <td>3.8 km/h</td>
+            <td><span style="color: var(--sea-green);">Active (89.7% Conf.)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Finley</strong></td>
+            <td>Green Turtle</td>
+            <td>#TURTLE-7601</td>
+            <td>28.32° N, 80.60° W</td>
+            <td>1.9 km/h</td>
+            <td><span style="color: var(--sand-accent);">Updating Model</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Track the Turtle • Built with plain HTML/CSS/JS for GitHub Pages</p>
+  </footer>
+
+</body>
+</html>
