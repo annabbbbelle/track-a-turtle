@@ -6,17 +6,15 @@
   <title>Track the Turtle | Live Telemetry & AI Prediction</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Leaflet GIS CSS from CDN -->
+  <!-- Leaflet GIS CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <!-- Load Leaflet JS & TensorFlow.js CDN -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
-
-  <!-- Load Local Data, Analytics Engine, Navigation & Tracker Scripts -->
-  <script src="data.js"></script>
-  <script src="analyze.js"></script>
+  <!-- Scripts loaded in exact required order -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js" defer></script>
   <script src="nav.js" defer></script>
+  <script src="data.js" defer></script>
+  <script src="analyze.js" defer></script>
   <script src="tracker.js" defer></script>
 
   <style>
@@ -245,7 +243,7 @@
 </head>
 <body>
 
-  <!-- Navigation dynamically populated by nav.js -->
+  <!-- Navigation injected dynamically by nav.js -->
   <nav id="site-nav"></nav>
 
   <main>
@@ -258,7 +256,7 @@
     <!-- Main Tracker Layout -->
     <div class="tracker-layout">
 
-      <!-- Left Column: Map + Playback Controls + AI Section -->
+      <!-- Left Column: Map + Controls + AI Section -->
       <div>
         <div class="map-card">
           
@@ -297,7 +295,7 @@
             </div>
           </div>
 
-          <!-- Journey Replay Controls -->
+          <!-- Replay Controls Bar -->
           <div class="controls-bar">
             <div class="slider-row">
               <button id="play-pause-btn" class="btn btn-primary" style="padding: 0.5rem 1.2rem; min-width: 120px; font-size: 0.9rem;">
@@ -306,7 +304,7 @@
               <input type="range" id="day-slider" class="day-slider-input" min="0" max="149" value="0">
             </div>
 
-            <!-- Live Telemetry Counters -->
+            <!-- Live Telemetry Stats -->
             <div class="live-stats-row">
               <div class="live-stat-box">
                 <div class="live-stat-title">Date</div>
@@ -362,4 +360,47 @@
 
           <!-- Evaluation Results Table Container -->
           <div id="ai-results-container" style="display: none; margin-top: 1.5rem;">
-            <h4 style="color: var(--text-
+            <h4 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.8rem;">
+              📊 10-Day Prediction Performance Comparison
+            </h4>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>🤖 AI Model (TensorFlow.js)</th>
+                    <th>📏 Baseline (Constant Velocity)</th>
+                  </tr>
+                </thead>
+                <tbody id="ai-results-tbody">
+                  <!-- Injected dynamically by tracker.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Winner Banner -->
+            <div id="ai-winner-banner"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right Column: Turtle Analytics Side Panel -->
+      <div id="tracker-side-panel">
+        <!-- Rendered dynamically by tracker.js -->
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Track the Turtle • Built with plain HTML, CSS & JS for GitHub Pages</p>
+    <p style="margin-top: 0.4rem; font-size: 0.82rem; color: var(--text-muted);">
+      Telemetry data is simulated for demonstration purposes. Map tiles and geographic data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.
+    </p>
+  </footer>
+
+</body>
+</html>
