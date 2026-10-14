@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track the Turtle | Personality Quiz</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="nav.js" defer></script>
+</head>
+<body>
+
+  <!-- Navigation injected dynamically by nav.js -->
+  <nav id="site-nav"></nav>
+
+  <main>
+    <div class="page-header">
+      <span class="badge">AI Matcher</span>
+      <h1 class="page-title">Which Sea Turtle Are You?</h1>
+      <p class="page-subtitle">Answer a few questions about your lifestyle to let our similarity algorithm match you with an active tracked sea turtle!</p>
+    </div>
+
+    <div class="quiz-container">
+      <div style="margin-bottom: 1.5rem; text-align: center;">
+        <span style="color: var(--primary-cyan); font-weight: 600;">Question 1 of 3</span>
+        <h2 style="font-size: 1.4rem; margin-top: 0.5rem;">How do you prefer to spend your dream vacation?</h2>
+      </div>
+
+      <!-- Placeholder Question Options -->
+      <div class="quiz-option">
+        <span style="font-size: 1.2rem;">🌴</span>
+        <div>
+          <strong>Chilling on warm coastal beaches</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Soaking up sunlight and enjoying calm shallow waters.</p>
+        </div>
+      </div>
+
+      <div class="quiz-option">
+        <span style="font-size: 1.2rem;">🌊</span>
+        <div>
+          <strong>Diving into deep, unexplored waters</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Exploring deep ocean trenches and swimming long distances.</p>
+        </div>
+      </div>
+
+      <div class="quiz-option">
+        <span style="font-size: 1.2rem;">🪸</span>
+        <div>
+          <strong>Foraging through vibrant coral reefs</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Staying close to shelter while searching for delicious snacks.</p>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn btn-primary">Next Question &rarr;</button>
+      </div>
+
+      <!-- Result Preview Placeholder -->
+      <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px dashed var(--border-subtle); text-align: center;">
+        <h3 style="color: var(--sea-green); margin-bottom: 0.5rem;">AI Match Result Preview</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Your match vector will calculate similarity scores across <em>Loggerhead</em>, <em>Leatherback</em>, <em>Green Turtle</em>, and <em>Hawksbill</em> profiles!
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Track the Turtle • Built with plain HTML/CSS/JS for GitHub Pages</p>
+  </footer>
+
+</body>
+</html>
