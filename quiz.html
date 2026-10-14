@@ -6,10 +6,10 @@
   <title>Track the Turtle | Personality Quiz</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Load Dataset, Analysis Engine, Navigation & Quiz Logic -->
-  <script src="data.js"></script>
-  <script src="analyze.js"></script>
+  <!-- Deferred Script Loading -->
   <script src="nav.js" defer></script>
+  <script src="data.js" defer></script>
+  <script src="analyze.js" defer></script>
   <script src="quiz.js" defer></script>
 
   <style>
@@ -151,7 +151,7 @@
 </head>
 <body>
 
-  <!-- Navigation dynamically populated by nav.js -->
+  <!-- Navigation injected dynamically by nav.js -->
   <nav id="site-nav"></nav>
 
   <main>
@@ -195,7 +195,7 @@
       </div>
     </div>
 
-    <!-- Final Profile Result Container (Hidden until quiz completion) -->
+    <!-- Final Profile Result Container -->
     <div id="quiz-results-card" style="display: none;">
       <div id="quiz-result-container">
         <!-- Rendered dynamically by quiz.js -->
