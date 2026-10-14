@@ -1,19 +1,26 @@
 /* 
- * tracker.js - Interactive Leaflet Map & Telemetry Playback Engine
+ * tracker.js - Interactive Leaflet Map & TensorFlow.js AI Prediction Engine
  * 
  * Educational Notes for AI Class Presentation:
- * 1. Leaflet GIS Mapping: Initializes satellite ocean tile rendering and manages dynamic vector polyline layers.
- * 2. Route Parsing: Reads ?turtle=ID from the URL query string with fallback to localStorage or default dataset.
- * 3. Playback Synchronization: Runs a tick loop that steps through daily GPS points (0-149), dynamically re-calculating
- *    distance covered and instant daily speed while updating map layers.
+ * 1. TensorFlow.js Browser Training: Trains a 3-layer neural network directly in the browser 
+ *    using client-side GPU/CPU acceleration (zero external APIs).
+ * 2. Vector Delta Processing: Transforms raw GPS coordinates into relative movement vectors 
+ *    (dLat, dLon) to teach the network speed and directional momentum.
+ * 3. Autoregressive Forecasting: Iteratively feeds each predicted step back into a 5-day sliding window 
+ *    to project 10 steps into the future.
+ * 4. Baseline Benchmarking: Compares AI forecasts against a constant-velocity persistence baseline.
  */
 
-// Global State Variables
+// Global Map & Layer Variables
 let map = null;
 let fullPathPolyline = null;
 let traveledPolyline = null;
+let actualFuturePolyline = null;
+let aiPredictionPolyline = null;
+let baselinePolyline = null;
 let turtleMarker = null;
 
+// Global State Variables
 let currentTurtle = null;
 let currentDayIndex = 0;
 let isPlaying = false;
@@ -30,7 +37,6 @@ function getInitialTurtleId() {
     return urlTurtle;
   }
 
-  // Fallback to saved quiz result in localStorage
   try {
     const savedResult = localStorage.getItem('trackTheTurtle_userResult');
     if (savedResult) {
@@ -43,7 +49,6 @@ function getInitialTurtleId() {
     console.warn("Could not read quiz result from localStorage:", e);
   }
 
-  // Fallback to first available turtle
   return Object.keys(TURTLE_DATA)[0] || 'explorer';
 }
 
@@ -54,31 +59,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const mapElement = document.getElementById('map');
   if (!mapElement || typeof L === 'undefined' || typeof TURTLE_DATA === 'undefined') return;
 
-  // 1. Initialize Leaflet Map
   initMap();
-
-  // 2. Populate Dropdown Select Options
   populateTurtleDropdown();
 
-  // 3. Load Initial Turtle Data
   const initialId = getInitialTurtleId();
   switchTurtle(initialId);
 
-  // 4. Attach Control Listeners
   attachControlListeners();
 });
 
 /**
- * Initialize Leaflet Map Instance with OpenStreetMap Tiles
+ * Initialize Leaflet Map Instance with OpenStreetMap Tiles & Prediction Layers
  */
 function initMap() {
-  // Center roughly on Atlantic ocean zone
   map = L.map('map', {
     zoomControl: true,
     attributionControl: true
   }).setView([25, -75], 5);
 
-  // Tile Layer from OpenStreetMap CDN
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -89,17 +87,40 @@ function initMap() {
     color: '#00e5ff',
     weight: 2,
     dashArray: '6, 8',
-    opacity: 0.45
+    opacity: 0.4
   }).addTo(map);
 
   // Layer 2: Solid vibrant line representing path traveled so far
   traveledPolyline = L.polyline([], {
-    color: '#00f5d4',
+    color: '#00f5d4', // Sea Green
     weight: 4,
     opacity: 0.95
   }).addTo(map);
 
-  // Layer 3: Custom 🐢 DivIcon Marker for current position
+  // Layer 3: Actual Path for Next 10 Days
+  actualFuturePolyline = L.polyline([], {
+    color: '#f4a261', // Sand Gold
+    weight: 4,
+    opacity: 0.9
+  }).addTo(map);
+
+  // Layer 4: AI Predicted Path (TensorFlow.js)
+  aiPredictionPolyline = L.polyline([], {
+    color: '#e0aaff', // Bright Purple
+    weight: 3,
+    dashArray: '6, 6',
+    opacity: 0.95
+  }).addTo(map);
+
+  // Layer 5: Baseline Path (Constant Velocity)
+  baselinePolyline = L.polyline([], {
+    color: '#ff6b6b', // Coral Red
+    weight: 3,
+    dashArray: '4, 4',
+    opacity: 0.85
+  }).addTo(map);
+
+  // Layer 6: Custom 🐢 DivIcon Marker
   const turtleIcon = L.divIcon({
     className: 'custom-turtle-marker',
     html: `<div style="font-size: 32px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6)); cursor: pointer;">🐢</div>`,
@@ -138,17 +159,18 @@ function switchTurtle(turtleId) {
   if (!TURTLE_DATA[turtleId]) return;
 
   currentTurtle = TURTLE_DATA[turtleId];
-  currentDayIndex = 0; // Reset to Day 1
+  currentDayIndex = 0;
 
-  // Update browser URL query parameter without page reload
+  // Clear previous predictions
+  clearPredictionLayers();
+
+  // Update browser URL query parameter
   const newUrl = `${window.location.pathname}?turtle=${turtleId}`;
   window.history.replaceState({ path: newUrl }, '', newUrl);
 
-  // Synchronize Dropdown Value
   const selectEl = document.getElementById('turtle-select');
   if (selectEl) selectEl.value = turtleId;
 
-  // Set Full Path Coordinates & Zoom Map to Fit Path
   const fullTrackCoords = currentTurtle.track.map(p => [p.lat, p.lon]);
   fullPathPolyline.setLatLngs(fullTrackCoords);
 
@@ -156,7 +178,6 @@ function switchTurtle(turtleId) {
     map.fitBounds(fullPathPolyline.getBounds(), { padding: [45, 45] });
   }
 
-  // Update Slider Attributes
   const slider = document.getElementById('day-slider');
   if (slider) {
     slider.min = 0;
@@ -164,34 +185,52 @@ function switchTurtle(turtleId) {
     slider.value = 0;
   }
 
-  // Render Side Panel Information
   renderSidePanel();
-
-  // Update Display to Initial Day
   updatePlaybackDisplay();
 }
 
 /**
- * Attach Play/Pause and Slider Event Controls
+ * Clear AI and Baseline Map Layers and UI Boxes
+ */
+function clearPredictionLayers() {
+  if (actualFuturePolyline) actualFuturePolyline.setLatLngs([]);
+  if (aiPredictionPolyline) aiPredictionPolyline.setLatLngs([]);
+  if (baselinePolyline) baselinePolyline.setLatLngs([]);
+
+  const warningBox = document.getElementById('ai-warning-box');
+  const resultsContainer = document.getElementById('ai-results-container');
+  const progressContainer = document.getElementById('ai-progress-container');
+
+  if (warningBox) warningBox.style.display = 'none';
+  if (resultsContainer) resultsContainer.style.display = 'none';
+  if (progressContainer) progressContainer.style.display = 'none';
+}
+
+/**
+ * Attach Control Event Listeners
  */
 function attachControlListeners() {
   const playBtn = document.getElementById('play-pause-btn');
   const slider = document.getElementById('day-slider');
+  const trainBtn = document.getElementById('train-predict-btn');
 
-  if (playBtn) {
-    playBtn.addEventListener('click', togglePlay);
-  }
+  if (playBtn) playBtn.addEventListener('click', togglePlay);
 
   if (slider) {
     slider.addEventListener('input', (e) => {
       currentDayIndex = parseInt(e.target.value, 10);
+      clearPredictionLayers();
       updatePlaybackDisplay();
     });
+  }
+
+  if (trainBtn) {
+    trainBtn.addEventListener('click', trainAndPredictAI);
   }
 }
 
 /**
- * Play/Pause Animation Loop Toggle
+ * Play/Pause Journey Animation
  */
 function togglePlay() {
   isPlaying = !isPlaying;
@@ -199,14 +238,13 @@ function togglePlay() {
 
   if (isPlaying) {
     if (playBtn) playBtn.innerHTML = '⏸ Pause';
-    
-    // Tick every 180ms
     playInterval = setInterval(() => {
       if (currentDayIndex < currentTurtle.track.length - 1) {
         currentDayIndex++;
       } else {
-        currentDayIndex = 0; // Loop around upon completion
+        currentDayIndex = 0;
       }
+      clearPredictionLayers();
       updatePlaybackDisplay();
     }, 180);
   } else {
@@ -216,7 +254,7 @@ function togglePlay() {
 }
 
 /**
- * Update Map Markers, Traveled Line, Slider Value & Live Stat Counters
+ * Update Map Markers, Traveled Path Line & Counters
  */
 function updatePlaybackDisplay() {
   if (!currentTurtle || !currentTurtle.track || currentTurtle.track.length === 0) return;
@@ -224,11 +262,9 @@ function updatePlaybackDisplay() {
   const track = currentTurtle.track;
   const currentPoint = track[currentDayIndex];
 
-  // 1. Update Traveled Path Line up to current index
   const traveledCoords = track.slice(0, currentDayIndex + 1).map(p => [p.lat, p.lon]);
   traveledPolyline.setLatLngs(traveledCoords);
 
-  // 2. Move 🐢 Marker to current coordinate
   turtleMarker.setLatLng([currentPoint.lat, currentPoint.lon]);
   turtleMarker.bindPopup(`
     <strong style="color:#040e1a;">${currentTurtle.name}</strong><br>
@@ -236,11 +272,9 @@ function updatePlaybackDisplay() {
     Lat: ${currentPoint.lat}°, Lon: ${currentPoint.lon}°
   `);
 
-  // 3. Update Day Slider position
   const slider = document.getElementById('day-slider');
   if (slider) slider.value = currentDayIndex;
 
-  // 4. Calculate Live Telemetry Metrics
   let totalTraveledKm = 0;
   for (let i = 0; i < currentDayIndex; i++) {
     totalTraveledKm += haversineDistance(
@@ -250,99 +284,4 @@ function updatePlaybackDisplay() {
   }
 
   let todaysSpeedKmDay = 0;
-  if (currentDayIndex > 0) {
-    todaysSpeedKmDay = haversineDistance(
-      track[currentDayIndex - 1].lat, track[currentDayIndex - 1].lon,
-      track[currentDayIndex].lat, track[currentDayIndex].lon
-    );
-  }
-
-  // 5. Update Live Counter DOM elements
-  const statDate = document.getElementById('live-stat-date');
-  const statDay = document.getElementById('live-stat-day');
-  const statKm = document.getElementById('live-stat-km');
-  const statSpeed = document.getElementById('live-stat-speed');
-
-  if (statDate) statDate.innerText = currentPoint.date;
-  if (statDay) statDay.innerText = `Day ${currentDayIndex + 1} / ${track.length}`;
-  if (statKm) statKm.innerText = `${totalTraveledKm.toFixed(1)} km`;
-  if (statSpeed) statSpeed.innerText = `${todaysSpeedKmDay.toFixed(1)} km/day`;
-}
-
-/**
- * Render Turtle Details & Classification Stats into the Side Panel
- */
-function renderSidePanel() {
-  const sidePanel = document.getElementById('tracker-side-panel');
-  if (!sidePanel || !currentTurtle) return;
-
-  // Run analyze.js functions on active turtle
-  const stats = analyzeTurtleTrack(currentTurtle.track);
-  const personality = classifyPersonality(stats);
-
-  sidePanel.innerHTML = `
-    <div class="card" style="padding: 1.5rem;">
-      <div class="archetype-badge ${personality.colorClass}">
-        <span>${personality.icon}</span>
-        <span>${personality.archetype}</span>
-      </div>
-
-      <h2 style="color: var(--text-main); font-size: 1.8rem; margin-top: 0.3rem; margin-bottom: 0.2rem;">
-        ${currentTurtle.name}
-      </h2>
-      
-      <p style="color: var(--sea-green); font-size: 0.85rem; font-style: italic; margin-bottom: 0.8rem;">
-        ${currentTurtle.species}
-      </p>
-
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem; line-height: 1.6;">
-        ${currentTurtle.description}
-      </p>
-
-      <div style="background: var(--bg-deep); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem;">
-        <h4 style="color: var(--primary-cyan); font-size: 0.9rem; margin-bottom: 0.4rem; text-transform: uppercase;">
-          Behavioral Profile
-        </h4>
-        <p style="color: var(--text-main); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem;">
-          "${personality.tagline}"
-        </p>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">
-          ${personality.description}
-        </p>
-      </div>
-
-      <h4 style="color: var(--text-main); font-size: 0.95rem; margin-bottom: 0.6rem;">
-        Full 150-Day Summary Statistics
-      </h4>
-
-      <div class="stats-grid">
-        <div class="stat-item">
-          <span class="stat-label">Total Path</span>
-          <span class="stat-value">${stats.totalDistanceKm.toLocaleString()} km</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Max Radius</span>
-          <span class="stat-value">${stats.maxDistanceFromStartKm.toLocaleString()} km</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Avg Pace</span>
-          <span class="stat-value">${stats.avgDailySpeedKmDay} km/day</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Consistency</span>
-          <span class="stat-value">${stats.speedConsistencyPct}%</span>
-        </div>
-        <div class="stat-item" style="grid-column: span 2;">
-          <span class="stat-label">Avg Turning Angle</span>
-          <span class="stat-value">${stats.avgTurningAngleDeg}° / step</span>
-        </div>
-      </div>
-
-      <div style="margin-top: 1.2rem; text-align: center;">
-        <a href="quiz.html" class="btn btn-secondary" style="width: 100%; display: block; font-size: 0.9rem;">
-          Take Quiz to Match Your Turtle 🧩
-        </a>
-      </div>
-    </div>
-  `;
-}
+  if (currentDayIndex >
