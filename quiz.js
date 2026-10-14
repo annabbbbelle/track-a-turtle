@@ -1,15 +1,6 @@
-/* 
- * quiz.js - Interactive Turtle Personality Quiz Engine
- * 
- * Educational Notes for AI Class Presentation:
- * 1. State Management: Tracks user choices across 8 questions with back-navigation support.
- * 2. Multi-Class Scoring: Maps each answer to one of 4 behavioral vector types (explorer, homebody, wanderer, commuter).
- * 3. AI Classifier Integration: Uses analyze.js kinematic output to automatically match the winning user archetype 
- *    with the corresponding real turtle profile.
- * 4. Persistence: Saves the user's matched turtle result into browser localStorage.
- */
+/* quiz.js - Interactive Quiz State Engine */
 
-const QUIZ_QUESTIONS = [
+var QUIZ_QUESTIONS = [
   {
     question: "What is your ideal weekend getaway style?",
     options: [
@@ -84,43 +75,34 @@ const QUIZ_QUESTIONS = [
   }
 ];
 
-// Quiz State
 let currentQuestionIndex = 0;
-let userAnswers = []; // Array storing selected archetype per question index e.g., ['explorer', 'homebody', ...]
+let userAnswers = [];
 
-// DOM Elements
-const questionCard = document.getElementById('quiz-question-card');
-const resultsCard = document.getElementById('quiz-results-card');
-const progressBar = document.getElementById('quiz-progress-bar');
-const progressText = document.getElementById('quiz-progress-text');
-const questionText = document.getElementById('quiz-question-text');
-const optionsContainer = document.getElementById('quiz-options-container');
-const prevBtn = document.getElementById('quiz-prev-btn');
-
-/**
- * Initialize Quiz on DOM Load
- */
 document.addEventListener('DOMContentLoaded', () => {
-  if (!questionCard) return; // Exit if not on quiz page
+  const questionCard = document.getElementById('quiz-question-card');
+  if (!questionCard) return;
   renderQuestion();
 });
 
-/**
- * Render Current Question & Update UI Progress
- */
 function renderQuestion() {
+  const questionCard = document.getElementById('quiz-question-card');
+  const progressBar = document.getElementById('quiz-progress-bar');
+  const progressText = document.getElementById('quiz-progress-text');
+  const questionText = document.getElementById('quiz-question-text');
+  const optionsContainer = document.getElementById('quiz-options-container');
+  const prevBtn = document.getElementById('quiz-prev-btn');
+
+  if (!questionCard) return;
+
   const q = QUIZ_QUESTIONS[currentQuestionIndex];
   const total = QUIZ_QUESTIONS.length;
 
-  // Update Progress Indicator
   const progressPercent = Math.round(((currentQuestionIndex + 1) / total) * 100);
   if (progressBar) progressBar.style.width = `${progressPercent}%`;
   if (progressText) progressText.innerText = `Question ${currentQuestionIndex + 1} of ${total}`;
 
-  // Set Question Text
   if (questionText) questionText.innerText = q.question;
 
-  // Render Option Buttons
   if (optionsContainer) {
     optionsContainer.innerHTML = '';
     
@@ -141,20 +123,14 @@ function renderQuestion() {
     });
   }
 
-  // Update Back Button Visibility
   if (prevBtn) {
     prevBtn.style.display = currentQuestionIndex > 0 ? 'inline-flex' : 'none';
   }
 }
 
-/**
- * Handle Option Selection and Advance Quiz
- */
 function handleOptionSelect(selectedType) {
-  // Save answer choice
   userAnswers[currentQuestionIndex] = selectedType;
 
-  // Advance or Finish
   if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
     currentQuestionIndex++;
     renderQuestion();
@@ -163,9 +139,6 @@ function handleOptionSelect(selectedType) {
   }
 }
 
-/**
- * Navigate to Previous Question
- */
 function navigatePrevious() {
   if (currentQuestionIndex > 0) {
     currentQuestionIndex--;
@@ -173,21 +146,18 @@ function navigatePrevious() {
   }
 }
 
-/**
- * Calculate Score, Match Turtle, Save to localStorage, and Render Results
- */
 function finishQuiz() {
-  // Hide Question View and Show Results View
-  questionCard.style.display = 'none';
-  resultsCard.style.display = 'block';
+  const questionCard = document.getElementById('quiz-question-card');
+  const resultsCard = document.getElementById('quiz-results-card');
 
-  // 1. Tally Archetype Scores
+  if (questionCard) questionCard.style.display = 'none';
+  if (resultsCard) resultsCard.style.display = 'block';
+
   const scores = { explorer: 0, homebody: 0, wanderer: 0, commuter: 0 };
   userAnswers.forEach(type => {
     if (scores[type] !== undefined) scores[type]++;
   });
 
-  // 2. Determine Winning Archetype
   let winningType = 'explorer';
   let maxScore = -1;
   Object.keys(scores).forEach(type => {
@@ -197,27 +167,23 @@ function finishQuiz() {
     }
   });
 
-  // 3. Match User Archetype with Analyzed Turtle
   let matchedTurtle = null;
   let matchedStats = null;
   let matchedPersonality = null;
 
   if (typeof TURTLE_DATA !== 'undefined' && typeof analyzeTurtleTrack === 'function') {
-    // Iterate through TURTLE_DATA and find turtle classified with matching archetype
     Object.keys(TURTLE_DATA).forEach(key => {
       const turtle = TURTLE_DATA[key];
       const stats = analyzeTurtleTrack(turtle.track);
       const personality = classifyPersonality(stats);
 
-      // Match either by turtle ID or by classification archetype
-      if (turtle.id === winningType || personality.archetype.toLowerCase().includes(winningType)) {
+      if (turtle.id === winningType || personality.id === winningType) {
         matchedTurtle = turtle;
         matchedStats = stats;
         matchedPersonality = personality;
       }
     });
 
-    // Fallback if direct match not caught
     if (!matchedTurtle && TURTLE_DATA[winningType]) {
       matchedTurtle = TURTLE_DATA[winningType];
       matchedStats = analyzeTurtleTrack(matchedTurtle.track);
@@ -225,7 +191,6 @@ function finishQuiz() {
     }
   }
 
-  // 4. Save Match Outcome in localStorage
   if (matchedTurtle && matchedPersonality) {
     const quizResult = {
       turtleId: matchedTurtle.id,
@@ -243,13 +208,9 @@ function finishQuiz() {
     }
   }
 
-  // 5. Render Profile Card Result UI
   renderProfileCard(matchedTurtle, matchedStats, matchedPersonality, scores);
 }
 
-/**
- * Render Final Profile Card UI
- */
 function renderProfileCard(turtle, stats, personality, scores) {
   const resultContainer = document.getElementById('quiz-result-container');
   if (!resultContainer) return;
@@ -273,7 +234,6 @@ function renderProfileCard(turtle, stats, personality, scores) {
         ${personality.description}
       </p>
 
-      <!-- Key Telemetry Stats Grid -->
       <div class="stats-grid" style="margin-bottom: 1.8rem;">
         <div class="stat-item">
           <span class="stat-label">Total Distance</span>
@@ -297,7 +257,6 @@ function renderProfileCard(turtle, stats, personality, scores) {
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <div class="btn-group" style="justify-content: center;">
         <a href="tracker.html?turtle=${turtle.id}" class="btn btn-primary" style="padding: 0.9rem 2rem; font-size: 1.05rem;">
           Track ${turtle.name} Live 📍
@@ -310,12 +269,12 @@ function renderProfileCard(turtle, stats, personality, scores) {
   `;
 }
 
-/**
- * Reset Quiz to Initial State
- */
 function resetQuiz() {
   currentQuestionIndex = 0;
   userAnswers = [];
+  const questionCard = document.getElementById('quiz-question-card');
+  const resultsCard = document.getElementById('quiz-results-card');
+
   if (resultsCard) resultsCard.style.display = 'none';
   if (questionCard) questionCard.style.display = 'block';
   renderQuestion();
